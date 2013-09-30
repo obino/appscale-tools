@@ -148,6 +148,7 @@ class GCEAgent(BaseAgent):
       raise AgentConfigurationException("We couldn't validate your GCE" + \
         "credentials. Are your credentials valid?")
 
+
   def configure_instance_security(self, parameters):
     """ Creates a GCE network and firewall with the specified name, and opens
     the ports on that firewall as needed for AppScale.
