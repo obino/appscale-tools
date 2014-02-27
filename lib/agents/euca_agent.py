@@ -169,6 +169,28 @@ class EucalyptusAgent(EC2Agent):
       return False
 
 
+  def cleanup_state(self, parameters):
+    """ Removes the keyname and security group created during this AppScale
+    deployment.
+
+    Args:
+      parameters: A dict that contains the keyname and security group to delete.
+    """
+    AppScaleLogger.log("Deleting keyname {0}".format(
+      parameters[self.PARAM_KEYNAME]))
+    conn = self.open_connection(parameters)
+    conn.delete_key_pair(parameters[self.PARAM_KEYNAME])
+
+    AppScaleLogger.log("Deleting security group {0}".format(
+      parameters[self.PARAM_GROUP]))
+    while True:
+      try:
+        conn.delete_security_group(parameters[self.PARAM_GROUP])
+        return
+      except EC2ResponseError:
+        time.sleep(5)
+
+
   def __get_instance_info(self, instances, status, keyname):
     """
     Filter out a list of instances by instance status and keyname.
