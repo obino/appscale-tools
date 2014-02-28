@@ -36,6 +36,11 @@ class EC2Agent(BaseAgent):
   # requests as replay attacks.
   SLEEP_TIME = 20
 
+  # Some commands requires a little sleep to ensure the result is
+  # propagated throughout.
+  SMALL_SLEEP = 5
+
+
   PARAM_CREDENTIALS = 'credentials'
   PARAM_GROUP = 'group'
   PARAM_IMAGE_ID = 'image_id'
@@ -733,7 +738,7 @@ class EC2Agent(BaseAgent):
         conn.delete_security_group(parameters[self.PARAM_GROUP])
         return
       except EC2ResponseError:
-        time.sleep(5)
+        time.sleep(self.SMALL_SLEEP)
 
 
   def get_optimal_spot_price(self, conn, instance_type, zone):
