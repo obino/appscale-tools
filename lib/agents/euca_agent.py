@@ -31,10 +31,6 @@ class EucalyptusAgent(EC2Agent):
   # A list of credentials that we build our internal credential list from.
   REQUIRED_CREDENTIALS = REQUIRED_EUCA_CREDENTIALS
 
-  # Some commands requires a little sleep to ensure the result is
-  # propagated throughout.
-  SMALL_SLEEP = 5
-
   def open_connection(self, parameters):
     """
     Initialize a connection to the back-end Eucalyptus APIs.
@@ -190,8 +186,8 @@ class EucalyptusAgent(EC2Agent):
       try:
         conn.delete_security_group(parameters[self.PARAM_GROUP])
         return
-      except EC2ResponseError:
-        time.sleep(self.SMALL_SLEEP)
+      except EC2ResponseError e:
+        print e
 
 
   def __get_instance_info(self, instances, status, keyname):
