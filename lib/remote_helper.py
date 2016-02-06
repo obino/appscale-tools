@@ -681,31 +681,19 @@ class RemoteHelper(object):
     """
     AppScaleLogger.log("Starting AppController at {0}".format(host))
 
-    # remove any possible appcontroller state that may not have been
-    # properly removed in virtualized clusters
-    cls.ssh(host, keyname, 'rm -rf /etc/appscale/appcontroller-state.json',
-      is_verbose)
+    # Remove any possible appcontroller state that may not have been
+    # properly removed in virtualized clusters, so the local state and the
+    # zookeeler locations needs to go.
+    old_state = "rm -rf {} {}".format("/etc/appscale/appcontroller-state.json",
+      "/etc/appscale/zookeeper_locations.json")
+    cls.ssh(host, keyname, old_state, is_verbose)
 
-    # Remove any monit configuration files from previous AppScale deployments.
-    cls.ssh(host, keyname, 'rm -rf /etc/monit/conf.d/appscale-*.cfg', is_verbose)
-
-    # Copy over the config file that indicates how the AppController should be
-    # started up.
-    cls.scp(host, keyname, cls.MONIT_APPCONTROLLER_CONFIG_FILE,
-      '/etc/monit/conf.d/appscale-controller-17443.cfg', is_verbose)
-
-    # Start up monit.
-    cls.ssh(host, keyname, 'monit quit; ', is_verbose)
-    cls.ssh(host, keyname, 'service monit start', is_verbose)
-    time.sleep(1)
-
-    # Start the AppController.
-    cls.ssh(host, keyname, 'monit start -g controller', is_verbose)
-    time.sleep(1)
-
+    # The init script is all we need to get started.
+    cls.ssh(host, keyname, 'service appscale-controller start', is_verbose)
     AppScaleLogger.log("Please wait for the AppController to finish " + \
       "pre-processing tasks.")
 
+    # Now we wait till the AppController is ready.
     cls.sleep_until_port_is_open(host, AppControllerClient.PORT, is_verbose)
 
 
